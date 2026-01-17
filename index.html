@@ -1,517 +1,641 @@
-<!doctype html>
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Format & Date Log App — Updated</title>
-<style>
-  /* ============ THEMES (eye comfort palettes) ============= */
-  :root{
-    --bg:#f7f9fb; --card:#ffffff; --muted:#374151; --accent:#2563eb; --muted-2:#6b7280; --glass:rgba(0,0,0,0.04);
-    --accent-2:#f59e0b;
-  }
-  .theme-dark{
-    --bg:#0f1724; --card:#0b1220; --muted:#dbeafe; --muted-2:#94a3b8; --accent:#60a5fa; --glass:rgba(255,255,255,0.03); --accent-2:#fbbf24;
-  }
-  .theme-light{
-    --bg:#f6f8fb; --card:#ffffff; --muted:#0f1724; --muted-2:#475569; --accent:#2563eb; --glass:rgba(2,6,23,0.03); --accent-2:#b45309;
-  }
-  /* Eye-comfort palettes (warmer, lower blue) */
-  .theme-eye-light{
-    --bg:#fbf7ef; --card:#fffaf2; --muted:#2b2b24; --muted-2:#6b5f52; --accent:#d97706; --glass:rgba(0,0,0,0.03); --accent-2:#b45309;
-  }
-  .theme-eye-dark{
-    --bg:#12100c; --card:#161412; --muted:#f7efe3; --muted-2:#bfae9a; --accent:#fbbf24; --glass:rgba(255,255,255,0.02); --accent-2:#f59e0b;
-  }html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; background:var(--bg); color:var(--muted);} header{display:flex;align-items:center;gap:12px;padding:12px;box-shadow:0 1px 0 var(--glass);position:sticky;top:0;background:var(--bg);z-index:20} h1{margin:0;font-size:16px} nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap} button, input[type=file]{font:inherit} .nav-btn{background:transparent;border:1px solid var(--glass);padding:8px 10px;border-radius:8px;color:var(--muted-2);cursor:pointer} .nav-btn.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04203a;border:none} .container{display:grid;grid-template-columns:1fr;gap:12px;padding:12px;max-width:980px;margin:0 auto} .card{background:var(--card);padding:12px;border-radius:12px;border:1px solid var(--glass);box-shadow:0 6px 18px rgba(2,6,23,0.02)} .row{display:flex;gap:8px;align-items:center} .small{font-size:13px;color:var(--muted-2)} input[type=text],input[type=date],textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid var(--glass);background:transparent;color:var(--muted);box-sizing:border-box} textarea{min-height:64px;resize:vertical} .action{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:#04203a;padding:8px 10px;border-radius:8px;cursor:pointer} .danger{background:transparent;border:1px solid #ef4444;color:#ef4444;padding:8px 10px;border-radius:8px;cursor:pointer} .muted{color:var(--muted-2)} .controls{display:flex;gap:8px;flex-wrap:wrap} .cards{display:flex;flex-direction:column;gap:10px;margin-top:10px} .card-field{border:1px dashed var(--glass);padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(0,0,0,0.02),transparent);display:flex;gap:10px;align-items:flex-start} .card-handle{width:24px;height:24px;background:var(--glass);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:grab} .card-handle:active{cursor:grabbing} .card-content{flex:1} .card-meta{display:flex;gap:6px;align-items:center;margin-left:auto} .small-muted{font-size:12px;color:var(--muted-2)} .pill{padding:6px 8px;border-radius:999px;border:1px solid var(--glass);font-size:13px} footer{padding:12px;text-align:center;font-size:13px;color:var(--muted-2)} @media (max-width:880px){ .row{flex-direction:column;align-items:stretch} .nav-btn{padding:8px} } </style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TimeCurrency Market & Credit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        system: { 950: '#05070a', 900: '#0c0f16', 800: '#141a25', 700: '#1e2837', accent: '#3b82f6', danger: '#ef4444', success: '#10b981', warning: '#f59e0b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body { height: 100%; overflow: hidden; background: #05070a; color: #e2e8f0; -webkit-tap-highlight-color: transparent; }
+        .glass-panel { background: rgba(20, 26, 37, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .fade-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .cal-day { aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; font-size: 0.75rem; transition: all 0.2s; position: relative; }
+        .cal-day.active { background: #3b82f6; color: white; }
+        .cal-dot { width: 4px; height: 4px; border-radius: 50%; background: #ef4444; position: absolute; bottom: 4px; }
+    </style>
 </head>
-<body>
-<header>
-  <h1>Format & Date-based Log</h1>
-  <nav>
-    <button id="navFormat" class="nav-btn active">Format</button>
-    <button id="navUse" class="nav-btn">Use</button>
-    <button id="navSettings" class="nav-btn">Settings</button>
-  </nav>
-</header><div class="container">  <!-- FORMAT PAGE -->  <section id="pageFormat" class="card" aria-hidden="false">
-    <div style="display:flex;align-items:center;gap:8px">
-      <strong>Format Editor</strong>
-      <div class="small-muted">Drag to reorder. Changes saved automatically.</div>
-      <div style="margin-left:auto" class="small muted">Theme:
-        <select id="miniTheme" style="margin-left:8px;padding:6px;border-radius:8px;border:1px solid var(--glass);background:transparent;color:var(--muted)">
-          <option value="auto">Auto (device)</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="light-eye">Light (eye comfort)</option>
-          <option value="dark-eye">Dark (eye comfort)</option>
-        </select>
-      </div>
-    </div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-  <button id="addFieldBtn" class="action">Add Field</button>
-  <button id="loadExampleBtn" class="action">Load Example Schedule</button>
-  <button id="clearFormatBtn" class="danger">Clear Format</button>
-  <div style="margin-left:auto" class="small-muted">Storage auto-saves to device.</div>
-</div>
+<body class="flex flex-col h-full font-sans">
 
-<div id="formatCards" class="cards" style="margin-top:12px"></div>
+    <header class="h-16 border-b border-system-800 bg-system-900 flex items-center justify-between px-5 shrink-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-system-accent to-blue-700 flex items-center justify-center text-white shadow-lg shadow-blue-900/20">
+                <i class="fa-solid fa-vault"></i>
+            </div>
+            <h1 class="font-bold text-base tracking-tight">TimeCurrency</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 bg-system-800 px-3 py-1.5 rounded-full border border-system-700">
+                <i class="fa-solid fa-coins text-system-warning text-xs"></i>
+                <span id="wallet-balance" class="font-mono font-bold text-sm">0.00</span>
+            </div>
+            <button onclick="openSettings()" class="text-slate-500 hover:text-white p-2"><i class="fa-solid fa-sliders"></i></button>
+        </div>
+    </header>
 
-<hr style="border:none;height:1px;background:var(--glass);margin-top:12px"/>
+    <main id="app-content" class="flex-1 overflow-y-auto bg-system-950 p-5 pb-24 no-scrollbar"></main>
 
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-  <button id="exportFormatBtn" class="action">Export Format</button>
-  <button id="importFormatBtn" class="action">Import Format</button>
-  <input id="importFormatFile" type="file" accept="application/json" style="display:none">
-  <button id="saveFormatBtn" class="pill">Save (manual)</button>
-</div>
+    <nav class="h-18 border-t border-system-800 bg-system-900 flex justify-around items-center shrink-0 pb-safe z-30">
+        <button onclick="switchView('log')" class="nav-btn flex flex-col items-center gap-1 w-full text-system-accent" id="nav-log">
+            <i class="fa-solid fa-stopwatch text-xl"></i>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Log</span>
+        </button>
+        <button onclick="switchView('calendar')" class="nav-btn flex flex-col items-center gap-1 w-full text-slate-500" id="nav-calendar">
+            <i class="fa-solid fa-calendar-days text-xl"></i>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Calendar</span>
+        </button>
+        <button onclick="switchView('market')" class="nav-btn flex flex-col items-center gap-1 w-full text-slate-500" id="nav-market">
+            <i class="fa-solid fa-shop text-xl"></i>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Market</span>
+        </button>
+        <button onclick="switchView('credit')" class="nav-btn flex flex-col items-center gap-1 w-full text-slate-500" id="nav-credit">
+            <i class="fa-solid fa-landmark text-xl"></i>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Credit</span>
+        </button>
+    </nav>
 
-  </section>  <!-- USE PAGE -->  <section id="pageUse" class="card" style="display:none">
-    <div style="display:flex;gap:8px;align-items:center;">
-      <strong>Use Mode — Date-based logs</strong>
-      <div style="margin-left:auto" class="small-muted">Select date to load/save entries</div>
-    </div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
-  <label class="small-muted">Select date</label>
-  <input id="useDate" type="date" style="width:180px"/>
-  <button id="newEntryBtn" class="action">New / Clear Day</button>
-  <div style="margin-left:auto" class="small-muted">Autosaves as you type</div>
-</div>
+    <div id="modal-overlay" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 transition-opacity">
+        <div id="modal-card" class="bg-system-900 w-full max-w-sm rounded-3xl border border-system-700 shadow-2xl overflow-hidden fade-in"></div>
+    </div>
 
-<div id="useCards" class="cards" style="margin-top:12px"></div>
+    <script>
+        const STORAGE_KEY = 'TC_MARKET_CREDIT_V3';
+        const todayStr = new Date().toISOString().slice(0, 10);
+        
+        let state = {
+            wallet: 10,
+            debt: 0,
+            selectedDate: todayStr,
+            calYear: new Date().getFullYear(),
+            calMonth: new Date().getMonth(),
+            settings: { 
+                loanInterest: 10,
+                dailyInterest: 5
+            },
+            items: [
+                { id: '1', name: 'Focus Work', rate: 0.5, finePercent: 0 },
+                { id: '2', name: 'Entertainment', rate: -1.0, finePercent: 15 },
+                { id: '3', name: 'Exercise', rate: 0.3, finePercent: 0 }
+            ],
+            history: [] // Each item: { date, label, delta, mins, id, time }
+        };
 
-<div style="margin-top:8px" class="small-muted">Tip: switch to Format to change structure. Deleting a date from Settings removes saved values for that date.</div>
+        function save() { 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
+            document.getElementById('wallet-balance').textContent = state.wallet.toFixed(2);
+        }
 
-  </section>  <!-- SETTINGS PAGE -->  <section id="pageSettings" class="card" style="display:none">
-    <div style="display:flex;gap:8px;align-items:center;">
-      <strong>Settings & Backup</strong>
-      <div style="margin-left:auto" class="small-muted">Manage backups and per-date deletion</div>
-    </div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-  <button id="exportAllBtn" class="action">Backup All (format + logs)</button>
-  <button id="exportFormatOnlyBtn" class="action">Export Format Only</button>
-  <button id="exportLogsOnlyBtn" class="action">Export Logs Only</button>
-  <button id="importAllBtn" class="action">Restore Backup</button>
-  <input id="importAllFile" type="file" accept="application/json" style="display:none">
+        function load() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) state = JSON.parse(data);
+            if (!state.selectedDate) state.selectedDate = todayStr;
+            switchView('log');
+            save();
+        }
 
-  <button id="importFormatOnlyBtn" class="action">Import Format File</button>
-  <input id="importFormatOnlyFile" type="file" accept="application/json" style="display:none">
+        function switchView(view) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-system-accent', 'text-slate-500'));
+            const active = document.getElementById(`nav-${view}`);
+            if(active) active.classList.replace('text-slate-500', 'text-system-accent');
+            
+            const main = document.getElementById('app-content');
+            main.innerHTML = '';
 
-  <button id="importLogsOnlyBtn" class="action">Import Logs File</button>
-  <input id="importLogsOnlyFile" type="file" accept="application/json" style="display:none">
+            if (view === 'log') {
+                const dayHistory = state.history.filter(h => h.date === state.selectedDate);
+                main.innerHTML = `
+                    <div class="space-y-6 fade-in">
+                        <!-- Date Block -->
+                        <div class="flex items-center justify-between bg-system-800 p-4 rounded-2xl border border-system-700">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-system-accent/20 p-2 rounded-lg text-system-accent">
+                                    <i class="fa-solid fa-calendar-day"></i>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-bold text-slate-500 uppercase">Active Ledger Date</div>
+                                    <div class="text-white font-bold">${new Date(state.selectedDate).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                                </div>
+                            </div>
+                            ${state.selectedDate !== todayStr ? `<button onclick="state.selectedDate='${todayStr}'; switchView('log')" class="text-[10px] bg-system-accent text-white px-2 py-1 rounded">Today</button>` : ''}
+                        </div>
 
-  <button id="exportDayBtn" class="action">Export This Date</button>
-  <input id="exportDayDate" type="date" style="width:170px"/>
+                        <div class="glass-panel p-6 rounded-3xl space-y-5">
+                            <div class="flex justify-between items-center">
+                                <h2 class="font-bold text-lg text-white">Record Activity</h2>
+                                <button onclick="openFineModal()" class="text-system-danger border border-system-danger/30 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter">Manual Fine</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1.5 ml-1">Type</label>
+                                    <select id="log-item" class="w-full bg-system-950 border border-system-700 rounded-2xl p-4 text-sm text-white focus:ring-2 ring-system-accent/50">
+                                        ${state.items.map(i => `<option value="${i.id}">${i.name} (${i.rate > 0 ? '+' : ''}${i.rate}c/m)</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1.5 ml-1">Time (Minutes)</label>
+                                    <input type="number" id="log-mins" placeholder="0" class="w-full bg-system-950 border border-system-700 rounded-2xl p-4 text-white font-mono text-lg">
+                                </div>
+                                <button onclick="executeLog()" class="w-full bg-system-accent text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all">Submit Entry</button>
+                            </div>
+                        </div>
 
-  <button id="importDayBtn" class="action">Import Day Data</button>
-  <input id="importDayFile" type="file" accept="application/json" style="display:none">
+                        <div class="space-y-4">
+                            <h2 class="font-bold text-lg text-white px-2">Daily Ledger</h2>
+                            <div class="space-y-2">
+                                ${dayHistory.length === 0 ? '<div class="text-center py-10 text-slate-600 text-sm">No entries for this date.</div>' : ''}
+                                ${dayHistory.slice().reverse().map(h => `
+                                    <div class="bg-system-800/40 p-4 rounded-2xl border border-system-700 flex justify-between items-center">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-sm text-slate-200">${h.label}</span>
+                                            <span class="text-[10px] text-slate-500 font-mono">${h.time} ${h.mins ? '• ' + h.mins + 'm' : ''}</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="font-mono font-bold ${h.delta >= 0 ? 'text-system-success' : 'text-system-danger'}">
+                                                ${h.delta >= 0 ? '+' : ''}${h.delta.toFixed(2)}
+                                            </div>
+                                            <button onclick="openEditLogModal('${h.id}')" class="text-slate-600 hover:text-white p-1"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
 
-  <button id="clearAllBtn" class="danger">Reset App (clear everything)</button>
-</div>
+            if (view === 'calendar') {
+                main.innerHTML = renderCalendar();
+            }
 
-<hr style="border:none;height:1px;background:var(--glass);margin-top:12px"/>
+            if (view === 'market') {
+                main.innerHTML = `
+                    <div class="space-y-4 fade-in">
+                        <div class="flex justify-between items-center px-2">
+                            <h2 class="font-bold text-lg text-white">Item Rates</h2>
+                            <button onclick="openItemModal()" class="bg-system-accent/10 text-system-accent px-4 py-2 rounded-full text-xs font-bold border border-system-accent/20">+ Create</button>
+                        </div>
+                        <div class="space-y-3">
+                            ${state.items.map(item => `
+                                <div class="bg-system-800 p-4 rounded-2xl border border-system-700 flex justify-between items-center">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center ${item.rate >= 0 ? 'bg-system-success/10 text-system-success' : 'bg-system-danger/10 text-system-danger'}">
+                                            <i class="fa-solid ${item.rate >= 0 ? 'fa-arrow-up-right-dots' : 'fa-couch'}"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-white text-sm">${item.name}</div>
+                                            <div class="text-[11px] font-mono ${item.rate >= 0 ? 'text-system-success' : 'text-system-danger'}">
+                                                ${item.rate >= 0 ? 'Earn' : 'Cost'}: ${item.rate}c/m
+                                            </div>
+                                            ${item.rate < 0 ? `<div class="text-[9px] text-slate-500">Fine: ${item.finePercent}%</div>` : ''}
+                                        </div>
+                                    </div>
+                                    <button onclick="openItemModal('${item.id}')" class="text-slate-500 p-2"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
 
-<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-  <div>
-    <div class="small-muted">Delete specific date</div>
-    <input id="deleteDate" type="date" style="margin-top:6px"/>
-    <button id="deleteDateBtn" class="danger" style="margin-left:6px">Delete</button>
-  </div>
+            if (view === 'credit') {
+                main.innerHTML = `
+                    <div class="space-y-6 fade-in">
+                        <div class="bg-gradient-to-br from-indigo-900/40 to-system-950 p-6 rounded-3xl border border-indigo-500/20 text-center">
+                            <div class="text-[10px] uppercase font-bold text-indigo-400 mb-1">Total Outstanding Loan</div>
+                            <div class="text-4xl font-mono font-bold text-white mb-4">${state.debt.toFixed(2)}c</div>
+                            <div class="flex gap-2">
+                                <button onclick="openLoanModal()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold text-sm">Take Loan</button>
+                                <button onclick="openPaybackModal()" class="flex-1 border border-indigo-600 text-indigo-400 py-3 rounded-xl font-bold text-sm">Repay</button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-system-800 p-5 rounded-3xl border border-system-700 space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase mb-2">Daily Management</h3>
+                            <button onclick="carryOverDay()" class="w-full bg-system-warning/10 border border-system-warning/20 text-system-warning py-3 rounded-xl font-bold text-xs uppercase tracking-widest">
+                                Trigger Daily Carryover (${state.settings.dailyInterest}% Interest)
+                            </button>
+                            <div class="text-[10px] text-slate-500 text-center">Carryover interest applies to existing debt at the end of the day.</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
 
-  <div style="margin-left:auto" class="small-muted">
-    <div>App version: <strong>1.1</strong></div>
-    <div id="infoCounts"></div>
-  </div>
-</div>
+        // --- CALENDAR LOGIC ---
 
-  </section></div><footer>
-  <div class="small muted">PWA install supported. Data stored locally. No alarms included.</div>
-</footer><script>
-/* ================== STORAGE KEYS ================== */
-const KEY_FMT = 'fmt_v1';
-const KEY_LOGS = 'logs_v1'; // logs stored as object { "YYYY-MM-DD": { values: { fieldId: value, ... } } }
+        function renderCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const firstDay = new Date(state.calYear, state.calMonth, 1).getDay();
+            const totalDays = new Date(state.calYear, state.calMonth + 1, 0).getDate();
+            
+            let html = `
+                <div class="space-y-4 fade-in">
+                    <div class="flex justify-between items-center bg-system-800 p-4 rounded-2xl border border-system-700">
+                        <button onclick="changeMonth(-1)" class="p-2 text-slate-400"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h2 class="font-bold text-white">${monthNames[state.calMonth]} ${state.calYear}</h2>
+                        <button onclick="changeMonth(1)" class="p-2 text-slate-400"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2">
+                        ${['S','M','T','W','T','F','S'].map(d => `<div class="text-center text-[10px] font-bold text-slate-600 pb-2">${d}</div>`).join('')}
+                        ${Array(firstDay).fill(0).map(() => `<div></div>`).join('')}
+                        ${Array(totalDays).fill(0).map((_, i) => {
+                            const d = i + 1;
+                            const dateStr = `${state.calYear}-${String(state.calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                            const isToday = dateStr === todayStr;
+                            const isActive = dateStr === state.selectedDate;
+                            
+                            // Check for negative balance
+                            const daySum = state.history.filter(h => h.date === dateStr).reduce((acc, curr) => acc + curr.delta, 0);
+                            const hasFine = daySum < 0;
 
-/* ================== APP STATE ================== */
-let format = loadJSON(KEY_FMT) || []; // array of { id, label, type }
-let logs = loadJSON(KEY_LOGS) || {};  // object mapping date -> { values: {fieldId: value} }
+                            return `
+                                <div onclick="selectDate('${dateStr}')" class="cal-day cursor-pointer ${isActive ? 'bg-system-accent text-white' : 'bg-system-800 text-slate-300 border border-system-700'} ${isToday && !isActive ? 'ring-1 ring-system-accent/50' : ''}">
+                                    ${d}
+                                    ${hasFine ? '<div class="cal-dot"></div>' : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            return html;
+        }
 
-/* ============== THEME ============== */
-const themeSelect = document.getElementById('miniTheme');
-const savedTheme = localStorage.getItem('theme_pref') || 'auto';
-themeSelect.value = savedTheme;
-applyTheme(savedTheme);
-themeSelect.addEventListener('change', e => { const v = e.target.value; localStorage.setItem('theme_pref', v); applyTheme(v); });
+        function changeMonth(dir) {
+            state.calMonth += dir;
+            if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
+            if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+            switchView('calendar');
+        }
 
-function applyTheme(pref){
-  // clear all theme classes
-  document.documentElement.classList.remove('theme-dark','theme-light','theme-eye-light','theme-eye-dark');
-  if(pref === 'dark'){ document.documentElement.classList.add('theme-dark'); }
-  else if(pref === 'light'){ document.documentElement.classList.add('theme-light'); }
-  else if(pref === 'light-eye'){ document.documentElement.classList.add('theme-eye-light'); }
-  else if(pref === 'dark-eye'){ document.documentElement.classList.add('theme-eye-dark'); }
-  else { // auto
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    if(mq.matches) document.documentElement.classList.add('theme-dark'); else document.documentElement.classList.add('theme-light');
-  }
-}
+        function selectDate(dateStr) {
+            state.selectedDate = dateStr;
+            switchView('log');
+        }
 
-/* ============== NAV ============== */
-const navFormat = document.getElementById('navFormat');
-const navUse = document.getElementById('navUse');
-const navSettings = document.getElementById('navSettings');
-const pageFormat = document.getElementById('pageFormat');
-const pageUse = document.getElementById('pageUse');
-const pageSettings = document.getElementById('pageSettings');
-navFormat.onclick = ()=> showPage('format');
-navUse.onclick = ()=> showPage('use');
-navSettings.onclick = ()=> showPage('settings');
-function showPage(p){
-  pageFormat.style.display = p==='format'? 'block':'none';
-  pageUse.style.display = p==='use'? 'block':'none';
-  pageSettings.style.display = p==='settings'? 'block':'none';
-  navFormat.classList.toggle('active', p==='format');
-  navUse.classList.toggle('active', p==='use');
-  navSettings.classList.toggle('active', p==='settings');
-  if(p==='format') renderFormatCards();
-  if(p==='use') renderUseCards();
-  if(p==='settings') updateInfoCounts();
-}
+        // --- CORE LOGIC ---
 
-/* ============== UTIL ============== */
-function saveJSON(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
-function loadJSON(key){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : null; } catch(e){ return null; } }
-function uid(prefix='f'){ return prefix + Math.random().toString(36).slice(2,9); }
-function todayISO(){ const d = new Date(); const mm = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `${d.getFullYear()}-${mm}-${dd}`; }
+        function executeLog() {
+            const itemId = document.getElementById('log-item').value;
+            const mins = parseInt(document.getElementById('log-mins').value || 0);
+            if (mins <= 0) return;
 
-/* Strong confirmation for destructive actions — reduces accidental clears */
-function confirmStrong(actionDescription){
-  const v = prompt(`${actionDescription}\nType DELETE to confirm:`);
-  return v === 'DELETE';
-}
+            const item = state.items.find(i => i.id === itemId);
+            const rawDelta = mins * item.rate;
 
-/* ============== FORMAT (cards with drag) ============== */
-const formatCards = document.getElementById('formatCards');
-const addFieldBtn = document.getElementById('addFieldBtn');
-const loadExampleBtn = document.getElementById('loadExampleBtn');
-const clearFormatBtn = document.getElementById('clearFormatBtn');
-const exportFormatBtn = document.getElementById('exportFormatBtn');
-const importFormatBtn = document.getElementById('importFormatBtn');
-const importFormatFile = document.getElementById('importFormatFile');
-const saveFormatBtn = document.getElementById('saveFormatBtn');
+            let finalDelta = rawDelta;
+            if (rawDelta < 0) {
+                const cost = Math.abs(rawDelta);
+                if (cost > state.wallet) {
+                    const coveredByWallet = Math.max(0, state.wallet);
+                    const deficit = cost - coveredByWallet;
+                    const fineAmount = deficit * (item.finePercent / 100);
+                    finalDelta = -(coveredByWallet + deficit + fineAmount);
+                }
+            }
 
-addFieldBtn.onclick = ()=> {
-  const label = prompt('Field label (e.g., "4:15 AM", "Notes", "Task")','New field');
-  if(!label) return;
-  const type = prompt('Type: short / long / checkbox / bullets / time','short');
-  if(!['short','long','checkbox','bullets','time'].includes(type)){ alert('Invalid type'); return; }
-  format.push({ id: uid('f'), label, type });
-  persistFormat();
-  renderFormatCards();
-};
-loadExampleBtn.onclick = ()=> {
-  if(!confirm('Replace existing format with example schedule?')) return;
-  const times = ["4:15 AM","4:30 AM","5:00 AM","5:30 AM","6:00 AM","7:00 AM","8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","5:00 PM","6:00 PM","7:00 PM","8:00 PM","9:00 PM","10:00 PM"];
-  format = [{ id: uid('f'), label: 'Date', type:'short' }];
-  for(const t of times) format.push({ id: uid('f'), label: t, type:'long' });
-  persistFormat();
-  renderFormatCards();
-};
+            state.wallet += finalDelta;
+            addHistory(item.name, finalDelta, mins);
 
-clearFormatBtn.onclick = ()=> { 
-  if(!confirmStrong('Clear format? This WILL NOT delete saved logs.')) return;
-  format = []; persistFormat(); renderFormatCards(); 
-};
+            save();
+            document.getElementById('log-mins').value = '';
+            switchView('log');
+        }
 
-exportFormatBtn.onclick = ()=> downloadFile(format, 'format.json');
-importFormatBtn.onclick = ()=> importFormatFile.click();
-importFormatFile.onchange = (e)=> {
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ev => {
-    try{ const obj = JSON.parse(ev.target.result); if(!Array.isArray(obj)) throw new Error('Format JSON must be array'); format = obj; persistFormat(); renderFormatCards(); alert('Format imported'); } catch(err){ alert('Import failed: ' + err.message); }
-  }; r.readAsText(f); importFormatFile.value='';
-};
-saveFormatBtn.onclick = ()=> { persistFormat(); alert('Format saved'); };
+        function addHistory(label, delta, mins = null) {
+            state.history.push({
+                id: Date.now().toString(),
+                date: state.selectedDate,
+                label, delta, mins,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+        }
 
-function persistFormat(){ saveJSON(KEY_FMT, format); updateInfoCounts(); }
-function persistLogs(){ saveJSON(KEY_LOGS, logs); updateInfoCounts(); }
+        // --- LOG EDITING ---
 
-function renderFormatCards(){
-  formatCards.innerHTML = '';
-  if(format.length===0){ formatCards.innerHTML = `<div class="small-muted">No fields yet. Add fields to start.</div>`; return; }
-  format.forEach((f, idx) => {
-    const el = document.createElement('div'); el.className = 'card-field'; el.draggable = true; el.dataset.id = f.id;
-    // drag handle
-    const handle = document.createElement('div'); handle.className='card-handle'; handle.title='Drag to reorder'; handle.innerHTML='☰';
-    el.appendChild(handle);
-    // content
-    const content = document.createElement('div'); content.className='card-content';
-    const label = document.createElement('div'); label.innerHTML = `<strong>${escapeHtml(f.label)}</strong> <div class="small-muted" style="font-size:12px">${f.type}</div>`;
-    content.appendChild(label);
-    // edit controls
-    const controls = document.createElement('div'); controls.style.display='flex'; controls.style.gap='6px'; controls.style.marginTop='8px';
-    const editBtn = document.createElement('button'); editBtn.className='pill'; editBtn.textContent='Edit';
-    editBtn.onclick = ()=> {
-      const newLabel = prompt('Label', f.label) || f.label;
-      const newType = prompt('Type (short,long,checkbox,bullets,time)', f.type) || f.type;
-      if(!['short','long','checkbox','bullets','time'].includes(newType)){ alert('Invalid type'); return; }
-      f.label = newLabel; f.type = newType;
-      persistFormat(); renderFormatCards();
-    };
-    const delBtn = document.createElement('button'); delBtn.className='danger'; delBtn.textContent='Delete';
-    delBtn.onclick = ()=> { 
-      if(!confirmStrong('Delete this field? All saved logs keep their values but the field will be removed from the format.')) return;
-      format = format.filter(x=>x.id !== f.id); persistFormat(); renderFormatCards(); 
-    };
-    controls.append(editBtn, delBtn);
-    content.appendChild(controls);
-    el.appendChild(content);
-    // drag events
-    el.addEventListener('dragstart', dragStart);
-    el.addEventListener('dragover', dragOver);
-    el.addEventListener('drop', dragDrop);
-    el.addEventListener('dragend', dragEnd);
-    formatCards.appendChild(el);
-  });
-}
+        function openEditLogModal(id) {
+            const entry = state.history.find(h => h.id === id);
+            showModal(`
+                <div class="p-6 space-y-5">
+                    <h3 class="font-bold text-white">Edit Record</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="e-label" value="${entry.label}" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white">
+                        <div>
+                            <label class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Delta (Coins)</label>
+                            <input type="number" step="0.01" id="e-delta" value="${entry.delta}" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Time (Mins)</label>
+                            <input type="number" id="e-mins" value="${entry.mins || 0}" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white font-mono">
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button onclick="updateLog('${id}')" class="flex-1 bg-system-accent py-3 rounded-xl font-bold text-sm">Update</button>
+                        <button onclick="requestSafeDelete('entry', '${id}')" class="flex-1 bg-system-danger py-3 rounded-xl font-bold text-sm">Delete</button>
+                    </div>
+                    <button onclick="closeModal()" class="w-full text-slate-500 text-xs py-2">Cancel</button>
+                </div>
+            `);
+        }
 
-/* Drag & drop implementation (simple) */
-let dragSrc = null;
-function dragStart(e){ dragSrc = this; e.dataTransfer.effectAllowed = 'move'; this.style.opacity = '0.6'; }
-function dragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-function dragDrop(e){
-  e.stopPropagation();
-  if(dragSrc !== this){
-    // swap positions in DOM and in format array
-    const srcId = dragSrc.dataset.id, dstId = this.dataset.id;
-    const i = format.findIndex(x=>x.id===srcId), j = format.findIndex(x=>x.id===dstId);
-    if(i>=0 && j>=0){
-      const [it] = format.splice(i,1);
-      format.splice(j,0,it);
-      persistFormat();
-      renderFormatCards();
-    }
-  }
-}
-function dragEnd(e){ this.style.opacity = ''; dragSrc = null; }
+        function updateLog(id) {
+            const idx = state.history.findIndex(h => h.id === id);
+            const label = document.getElementById('e-label').value;
+            const newDelta = parseFloat(document.getElementById('e-delta').value);
+            const newMins = parseInt(document.getElementById('e-mins').value);
 
-/* ============== USE PAGE (date-based) ============== */
-const useDate = document.getElementById('useDate');
-const useCards = document.getElementById('useCards');
-const newEntryBtn = document.getElementById('newEntryBtn');
+            // Correct wallet
+            state.wallet -= state.history[idx].delta;
+            state.wallet += newDelta;
 
-// default to today
-useDate.value = todayISO();
-useDate.addEventListener('change', ()=> renderUseCards()); // load selected date
+            state.history[idx].label = label;
+            state.history[idx].delta = newDelta;
+            state.history[idx].mins = newMins;
 
-newEntryBtn.onclick = ()=> {
-  if(!confirmStrong('Clear values for this date? This will overwrite current date values with empty defaults.')) return;
-  const d = useDate.value || todayISO();
-  logs[d] = { values: {} };
-  // initialize with empty values
-  for(const f of format) logs[d].values[f.id] = (f.type==='checkbox'? false : '');
-  persistLogs();
-  renderUseCards();
-};
+            save(); closeModal(); switchView('log');
+        }
 
-function renderUseCards(){
-  useCards.innerHTML = '';
-  const d = useDate.value || todayISO();
-  if(!(d in logs)) logs[d] = { values: {} }; // ensure object exists
-  const dayObj = logs[d];
-  // ensure all fields have keys
-  for(const f of format) if(!(f.id in dayObj.values)) dayObj.values[f.id] = (f.type==='checkbox'? false : '');
-  persistLogs();
+        // --- SAFE DELETION ---
 
-  if(format.length===0){
-    useCards.innerHTML = '<div class="small-muted">No format defined. Add fields in Format page first.</div>';
-    return;
-  }
+        function requestSafeDelete(type, id = null) {
+            let message = "Are you sure you want to delete this?";
+            let action = () => {};
 
-  format.forEach(f => {
-    const el = document.createElement('div'); el.className='card-field';
-    // no drag here - this is use mode
-    const handle = document.createElement('div'); handle.className='card-handle'; handle.innerHTML='●'; handle.title='Field';
-    el.appendChild(handle);
+            if (type === 'entry') {
+                message = "Remove this specific transaction? Wallet balance will be adjusted.";
+                action = () => {
+                    const idx = state.history.findIndex(h => h.id === id);
+                    state.wallet -= state.history[idx].delta;
+                    state.history.splice(idx, 1);
+                    save(); closeModal(); switchView('log');
+                };
+            } else if (type === 'today') {
+                message = `Wipe ALL data for ${state.selectedDate}? This includes ledger entries. Debt and total wallet will be adjusted based on removed entries.`;
+                action = () => {
+                    const daily = state.history.filter(h => h.date === state.selectedDate);
+                    daily.forEach(h => state.wallet -= h.delta);
+                    state.history = state.history.filter(h => h.date !== state.selectedDate);
+                    save(); closeModal(); switchView('log');
+                };
+            } else if (type === 'all') {
+                message = "CRITICAL: This will delete ALL history across ALL dates. Are you absolutely certain?";
+                action = () => {
+                    state.history = [];
+                    state.wallet = 10; // Reset to default
+                    state.debt = 0;
+                    save(); closeModal(); switchView('log');
+                };
+            }
 
-    const content = document.createElement('div'); content.className='card-content';
-    const label = document.createElement('div'); label.innerHTML = `<strong>${escapeHtml(f.label)}</strong> <div class="small-muted" style="font-size:12px">${f.type}</div>`;
-    content.appendChild(label);
+            showModal(`
+                <div class="p-6 text-center space-y-5">
+                    <div class="w-16 h-16 bg-system-danger/10 text-system-danger rounded-full flex items-center justify-center mx-auto">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-white text-lg">Confirm Action</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">${message}</p>
+                    <div class="flex flex-col gap-2">
+                        <button id="confirm-del-btn" class="bg-system-danger py-4 rounded-xl font-bold uppercase tracking-widest text-xs">Confirm Delete</button>
+                        <button onclick="closeModal()" class="py-3 text-slate-500 text-xs font-bold">Cancel</button>
+                    </div>
+                </div>
+            `);
 
-    // value input depending on type
-    if(f.type === 'short' || f.type === 'time'){
-      const inp = document.createElement('input'); inp.type='text';
-      inp.value = dayObj.values[f.id] ?? '';
-      inp.oninput = ()=> { dayObj.values[f.id] = inp.value; persistLogs(); };
-      content.appendChild(inp);
+            document.getElementById('confirm-del-btn').onclick = action;
+        }
 
-    } else if(f.type === 'long'){
-      const ta = document.createElement('textarea');
-      ta.value = dayObj.values[f.id] ?? '';
-      ta.oninput = ()=> { dayObj.values[f.id] = ta.value; persistLogs(); };
-      content.appendChild(ta);
+        // --- REST OF UI (MARKET, CREDIT, SETTINGS) ---
 
-    } else if(f.type === 'checkbox'){
-      const row = document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.gap='8px';
-      const cb = document.createElement('input'); cb.type='checkbox';
-      cb.checked = !!dayObj.values[f.id];
-      cb.onchange = ()=> { dayObj.values[f.id] = cb.checked; persistLogs(); };
-      row.appendChild(cb);
-      const lab = document.createElement('div'); lab.textContent = 'Checked';
-      row.appendChild(lab);
-      content.appendChild(row);
+        function openLoanModal() {
+            showModal(`
+                <div class="p-6 space-y-5">
+                    <h3 class="font-bold text-lg text-white">Borrow Coins</h3>
+                    <p class="text-xs text-slate-400">Processing interest (${state.settings.loanInterest}%) is applied instantly.</p>
+                    <input type="number" id="l-amount" placeholder="Amount to borrow" class="w-full bg-system-950 border border-system-700 rounded-xl p-4 text-white font-mono">
+                    <button onclick="takeLoan()" class="w-full bg-indigo-600 py-4 rounded-xl font-bold shadow-lg">Confirm Loan</button>
+                    <button onclick="closeModal()" class="w-full text-slate-500 text-xs py-2">Cancel</button>
+                </div>
+            `);
+        }
 
-    } else if(f.type === 'bullets'){
-      const ta = document.createElement('textarea');
-      ta.value = (Array.isArray(dayObj.values[f.id]) ? dayObj.values[f.id].join('\n') : (dayObj.values[f.id] || ''));
-      ta.oninput = ()=> { dayObj.values[f.id] = ta.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean); persistLogs(); };
-      content.appendChild(ta);
-    }
+        function takeLoan() {
+            const amount = parseFloat(document.getElementById('l-amount').value || 0);
+            if (amount <= 0) return;
+            const interest = amount * (state.settings.loanInterest / 100);
+            state.wallet += amount;
+            state.debt += (amount + interest);
+            addHistory("Manual Loan Received", amount);
+            addHistory("Loan Processing Fee", -interest);
+            save(); closeModal(); switchView('credit');
+        }
 
-    // small actions: clear value for this field on this date
-    const meta = document.createElement('div'); meta.className='card-meta';
-    const clearBtn = document.createElement('button'); clearBtn.className='pill'; clearBtn.textContent='Clear';
-    clearBtn.onclick = ()=> { if(!confirmStrong('Clear this field for selected date?')) return; dayObj.values[f.id] = (f.type==='checkbox'? false : ''); persistLogs(); renderUseCards(); };
-    meta.appendChild(clearBtn);
+        function openPaybackModal() {
+            showModal(`
+                <div class="p-6 space-y-5">
+                    <h3 class="font-bold text-lg text-white">Repay Credit</h3>
+                    <p class="text-xs text-slate-400">Debt: ${state.debt.toFixed(2)}c</p>
+                    <input type="number" id="p-amount" placeholder="Payment amount" class="w-full bg-system-950 border border-system-700 rounded-xl p-4 text-white font-mono">
+                    <button onclick="repayLoan()" class="w-full bg-system-success text-black py-4 rounded-xl font-bold">Pay Back</button>
+                    <button onclick="closeModal()" class="w-full text-slate-500 text-xs py-2">Cancel</button>
+                </div>
+            `);
+        }
 
-    content.appendChild(meta);
-    el.appendChild(content);
-    useCards.appendChild(el);
-  });
-}
+        function repayLoan() {
+            const amount = parseFloat(document.getElementById('p-amount').value || 0);
+            if (amount <= 0 || amount > state.wallet || amount > state.debt) return;
+            state.wallet -= amount;
+            state.debt -= amount;
+            addHistory("Debt Repayment", -amount);
+            save(); closeModal(); switchView('credit');
+        }
 
-/* ============== SETTINGS ============== */
-const exportAllBtn = document.getElementById('exportAllBtn');
-const exportFormatOnlyBtn = document.getElementById('exportFormatOnlyBtn');
-const exportLogsOnlyBtn = document.getElementById('exportLogsOnlyBtn');
-const importAllBtn = document.getElementById('importAllBtn');
-const importAllFile = document.getElementById('importAllFile');
-const importFormatOnlyBtn = document.getElementById('importFormatOnlyBtn');
-const importFormatOnlyFile = document.getElementById('importFormatOnlyFile');
-const importLogsOnlyBtn = document.getElementById('importLogsOnlyBtn');
-const importLogsOnlyFile = document.getElementById('importLogsOnlyFile');
-const exportDayBtn = document.getElementById('exportDayBtn');
-const exportDayDate = document.getElementById('exportDayDate');
-const importDayBtn = document.getElementById('importDayBtn');
-const importDayFile = document.getElementById('importDayFile');
-const clearAllBtn = document.getElementById('clearAllBtn');
-const deleteDate = document.getElementById('deleteDate');
-const deleteDateBtn = document.getElementById('deleteDateBtn');
-const infoCounts = document.getElementById('infoCounts');
+        function openItemModal(id = null) {
+            const item = id ? state.items.find(i => i.id === id) : { name: '', rate: 0.5, finePercent: 0 };
+            showModal(`
+                <div class="p-6 space-y-5">
+                    <h3 class="font-bold text-lg text-white">${id ? 'Update Item' : 'New Market Item'}</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="m-name" value="${item.name}" placeholder="Name" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white">
+                        <input type="number" step="0.01" id="m-rate" value="${item.rate}" placeholder="Rate (+ Earn / - Cost)" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white font-mono">
+                        <div id="fine-container" class="${item.rate >= 0 ? 'hidden' : ''}">
+                            <label class="text-[10px] text-slate-500 font-bold uppercase block mb-1">Overdraft Fine %</label>
+                            <input type="number" id="m-fine" value="${item.finePercent}" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white font-mono">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="closeModal()" class="flex-1 bg-system-800 py-3 rounded-xl font-bold text-sm">Cancel</button>
+                        <button onclick="saveItem('${id}')" class="flex-1 bg-system-accent py-3 rounded-xl font-bold text-sm">Save</button>
+                    </div>
+                </div>
+            `);
+        }
 
-exportAllBtn.onclick = ()=> {
-  try{
-    const all = { format, logs, version: '1.1', exportedAt: (new Date()).toISOString() };
-    downloadFile(all, 'backup_format_logs.json');
-  }catch(err){ alert('Export failed: ' + err.message); }
-};
+        function saveItem(id) {
+            const name = document.getElementById('m-name').value;
+            const rate = parseFloat(document.getElementById('m-rate').value);
+            const finePercent = parseFloat(document.getElementById('m-fine')?.value || 0);
+            if (!name) return;
+            if (id !== 'null') {
+                const idx = state.items.findIndex(i => i.id === id);
+                state.items[idx] = { ...state.items[idx], name, rate, finePercent };
+            } else {
+                state.items.push({ id: Date.now().toString(), name, rate, finePercent });
+            }
+            save(); closeModal(); switchView('market');
+        }
 
-exportFormatOnlyBtn.onclick = ()=> downloadFile(format, 'format_only.json');
-exportLogsOnlyBtn.onclick = ()=> downloadFile(logs, `logs_only_${todayISO()}.json`);
+        function openFineModal() {
+            showModal(`
+                <div class="p-6 space-y-5">
+                    <h3 class="font-bold text-lg text-system-danger">Manual Fine</h3>
+                    <input type="text" id="f-reason" placeholder="Reason" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white">
+                    <input type="number" id="f-amount" placeholder="Coins" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white font-mono">
+                    <button onclick="applyFine()" class="w-full bg-system-danger text-white py-4 rounded-xl font-bold">Apply Fine</button>
+                    <button onclick="closeModal()" class="w-full text-slate-500 text-xs py-2">Cancel</button>
+                </div>
+            `);
+        }
 
-importAllBtn.onclick = ()=> importAllFile.click();
-importAllFile.onchange = e => {
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ev => {
-    try{
-      const obj = JSON.parse(ev.target.result);
-      if(obj.format && obj.logs){
-        if(!confirmStrong('Restore backup: this will replace current format and logs.')) return;
-        format = obj.format; logs = obj.logs; persistFormat(); persistLogs(); alert('Backup restored'); renderFormatCards(); updateInfoCounts();
-      } else alert('Invalid backup file');
-    }catch(err){ alert('Import failed: ' + err.message); }
-  }; r.readAsText(f); importAllFile.value='';
-};
+        function applyFine() {
+            const reason = document.getElementById('f-reason').value || "Manual Fine";
+            const amount = parseFloat(document.getElementById('f-amount').value || 0);
+            if (amount <= 0) return;
+            state.wallet -= amount;
+            addHistory(`Fine: ${reason}`, -amount);
+            save(); closeModal(); switchView('log');
+        }
 
-importFormatOnlyBtn.onclick = ()=> importFormatOnlyFile.click();
-importFormatOnlyFile.onchange = e => {
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ev => {
-    try{ const obj = JSON.parse(ev.target.result); if(!Array.isArray(obj)) throw new Error('Format JSON must be array'); format = obj; persistFormat(); renderFormatCards(); alert('Format imported'); } catch(err){ alert('Import failed: ' + err.message); }
-  }; r.readAsText(f); importFormatOnlyFile.value='';
-};
+        function carryOverDay() {
+            if (state.debt > 0) {
+                const interest = state.debt * (state.settings.dailyInterest / 100);
+                state.debt += interest;
+                addHistory("Daily Debt Carryover Fee", -interest);
+                save(); switchView('credit');
+            }
+        }
 
-importLogsOnlyBtn.onclick = ()=> importLogsOnlyFile.click();
-importLogsOnlyFile.onchange = e => {
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ev => {
-    try{ const obj = JSON.parse(ev.target.result); if(typeof obj !== 'object') throw new Error('Logs JSON must be an object'); logs = obj; persistLogs(); alert('Logs imported'); } catch(err){ alert('Import failed: ' + err.message); }
-  }; r.readAsText(f); importLogsOnlyFile.value='';
-};
+        // --- DATA PORTABILITY & SETTINGS ---
 
-exportDayBtn.onclick = ()=> {
-  const d = exportDayDate.value || todayISO();
-  if(!(d in logs)){ return alert('No data for this date'); }
-  downloadFile(logs[d], `logs_${d}.json`);
-};
-importDayBtn.onclick = ()=> importDayFile.click();
-importDayFile.onchange = e => {
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ev => {
-    try{
-      const obj = JSON.parse(ev.target.result);
-      // expected shape: { values: {...} }
-      const d = exportDayDate.value || todayISO();
-      if(obj.values){ if(!confirmStrong(`Import day data into ${d}? This will overwrite existing values for that date.`)) return; logs[d] = obj; persistLogs(); alert('Day data imported'); } 
-      else alert('Invalid day file');
-    } catch(err){ alert('Import failed: ' + err.message); }
-  }; r.readAsText(f); importDayFile.value='';
-};
+        function openSettings() {
+            showModal(`
+                <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto no-scrollbar">
+                    <h3 class="font-bold text-white text-lg">Control Panel</h3>
+                    
+                    <div class="space-y-4">
+                        <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-system-700 pb-1">Interest Settings</h4>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1 ml-1">Loan Processing (%)</label>
+                            <input type="number" id="s-loan" value="${state.settings.loanInterest}" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-1 ml-1">Daily Carryover (%)</label>
+                            <input type="number" id="s-daily" value="${state.settings.dailyInterest}" class="w-full bg-system-950 border border-system-700 rounded-xl p-3 text-white">
+                        </div>
+                    </div>
 
-clearAllBtn.onclick = ()=> {
-  if(!confirmStrong('Reset app: clear format and all logs? This cannot be undone.')) return;
-  format = []; logs = {}; localStorage.removeItem(KEY_FMT); localStorage.removeItem(KEY_LOGS); updateInfoCounts(); renderFormatCards(); renderUseCards();
-  alert('App reset completed.');
-};
+                    <div class="space-y-3">
+                        <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-system-700 pb-1">Data Portability</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="exportData('all')" class="bg-system-800 border border-system-700 text-white text-[10px] py-2 rounded-lg font-bold">EXPORT ALL</button>
+                            <button onclick="importTrigger('all')" class="bg-system-800 border border-system-700 text-white text-[10px] py-2 rounded-lg font-bold">IMPORT ALL</button>
+                            <button onclick="exportData('date')" class="bg-system-800 border border-system-700 text-system-accent text-[10px] py-2 rounded-lg font-bold">EXPORT DATE</button>
+                            <button onclick="importTrigger('date')" class="bg-system-800 border border-system-700 text-system-accent text-[10px] py-2 rounded-lg font-bold">IMPORT DATE</button>
+                        </div>
+                        <input type="file" id="import-file" class="hidden" onchange="handleImport(this)">
+                    </div>
 
-deleteDateBtn.onclick = ()=> {
-  const d = deleteDate.value || '';
-  if(!d) return alert('Select a date to delete');
-  if(!(d in logs)) return alert('No data stored for that date');
-  if(!confirmStrong(`Delete saved data for ${d}? This cannot be undone.`)) return;
-  delete logs[d]; persistLogs(); updateInfoCounts(); renderUseCards(); alert('Deleted ' + d);
-};
+                    <div class="space-y-2 pt-4">
+                        <h4 class="text-[10px] font-bold text-system-danger uppercase tracking-widest border-b border-system-danger/20 pb-1">Destructive Actions</h4>
+                        <button onclick="requestSafeDelete('today')" class="w-full border border-system-danger/30 text-system-danger py-3 rounded-xl text-xs font-bold uppercase">Wipe ${state.selectedDate}</button>
+                        <button onclick="requestSafeDelete('all')" class="w-full bg-system-danger/10 text-system-danger py-3 rounded-xl text-xs font-bold uppercase">Factory Reset History</button>
+                    </div>
 
-function updateInfoCounts(){
-  const logCount = Object.keys(logs).length;
-  infoCounts.innerHTML = `Fields: <strong>${format.length}</strong> &nbsp;|&nbsp; Saved Dates: <strong>${logCount}</strong>`;
-  // set defaults for export date inputs
-  exportDayDate.value = useDate.value || todayISO();
-  deleteDate.value = useDate.value || todayISO();
-}
+                    <button onclick="saveSettings(); closeModal()" class="w-full bg-white text-black py-4 rounded-xl font-bold mt-4 shadow-xl">Apply Settings</button>
+                </div>
+            `);
+        }
 
-/* ============== BOOT ============== */
-function init(){
-  // ensure some structure
-  if(!Array.isArray(format)) format = [];
-  if(typeof logs !== 'object' || logs === null) logs = {};
-  renderFormatCards();
-  renderUseCards();
-  updateInfoCounts();
-  showPage('format');
-}
-init();
+        function saveSettings() {
+            state.settings.loanInterest = parseFloat(document.getElementById('s-loan').value);
+            state.settings.dailyInterest = parseFloat(document.getElementById('s-daily').value);
+            save();
+        }
 
-/* ============== HELPERS ============== */
-function downloadFile(obj, filename){
-  try{
-    const blob = new Blob([JSON.stringify(obj, null, 2)], { type:'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  }catch(err){ alert('Download failed: ' + err.message); }
-}
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        let importType = 'all';
+        function importTrigger(type) {
+            importType = type;
+            document.getElementById('import-file').click();
+        }
 
-/* ============== PERSIST LOAD/INIT ============== */
-function loadFromLocal(){
-  const f = loadJSON(KEY_FMT); if(f) format = f;
-  const l = loadJSON(KEY_LOGS); if(l) logs = l;
-}
-loadFromLocal(); // initial load
+        function exportData(type) {
+            let dataToExport = state;
+            let filename = `TC_BACKUP_${todayStr}.json`;
+            
+            if (type === 'date') {
+                dataToExport = state.history.filter(h => h.date === state.selectedDate);
+                filename = `TC_HISTORY_${state.selectedDate}.json`;
+            }
 
-// update whenever page unloads (safety)
-window.addEventListener('beforeunload', ()=> { saveJSON(KEY_FMT, format); saveJSON(KEY_LOGS, logs); });
+            const blob = new Blob([JSON.stringify(dataToExport)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
 
-// expose some debug helpers to console
-window._app = { format, logs, save: ()=> { saveJSON(KEY_FMT, format); saveJSON(KEY_LOGS, logs); } };
+        function handleImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (importType === 'all') {
+                        state = imported;
+                        save(); location.reload();
+                    } else {
+                        // Import history for specific date
+                        const others = state.history.filter(h => h.date !== state.selectedDate);
+                        state.history = [...others, ...imported];
+                        save(); switchView('log');
+                    }
+                } catch (err) {
+                    alert("Invalid file format.");
+                }
+            };
+            reader.readAsText(file);
+        }
 
-</script>
+        function showModal(html) {
+            const overlay = document.getElementById('modal-overlay');
+            const card = document.getElementById('modal-card');
+            card.innerHTML = html;
+            overlay.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+
+        load();
+    </script>
 </body>
 </html>
